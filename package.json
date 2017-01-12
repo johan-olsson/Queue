@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "node_modules/mocha/bin/mocha test"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/johan-olsson/Queue.git"
   },
   "author": "Johan Olsson",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^3.2.0"
+  }
 }
