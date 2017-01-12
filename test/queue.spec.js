@@ -1,8 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-
-const Queue = require('../Queue')
+const Queue = require('../')
 
 describe('Queue', function() {
 

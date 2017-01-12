@@ -1,0 +1,15 @@
+{
+  "name": "query",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/johan-olsson/Queue.git"
+  },
+  "author": "Johan Olsson",
+  "license": "MIT"
+}
