@@ -2,7 +2,7 @@
 
 # Methods
 
-```
+```javascript
 
 class YourClass extends Queue {
 
@@ -12,7 +12,7 @@ class YourClass extends Queue {
         this.result = docs
       })
     })
-    
+
     return this
   }
 
@@ -20,7 +20,7 @@ class YourClass extends Queue {
     this.push((next) => {
       this.result.forEach(fn)
     })
-    
+
     return this
   }
 }
@@ -36,8 +36,10 @@ db.find({
 ```
 
 ## push(task)
-push task to queue 
-```
+
+push task to queue
+```javascript
+
 queue.push((next) => {
   /* do something */
   next()
@@ -46,16 +48,15 @@ queue.push((next) => {
 
 ## resume()
 unpause queue and continue processing tasks
-```
-queue.push((next) => {
-  /* do something */
-  next()
-})
+```javascript
+
+queue.resume()
 ```
 
 ## pause()
-pause queue (after processing current task) 
-```
+pause queue (after processing current task)
+```javascript
+
 queue.pause()
 ```
 

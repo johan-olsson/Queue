@@ -1,10 +1,12 @@
 {
-  "name": "queue",
-  "version": "1.0.0",
-  "description": "",
+  "name": "ssfq",
+  "version": "0.0.1",
+  "description": "Simple Straight Forward Queue",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha test"
+    "test": "mocha test",
+    "test:watch": "mocha --watch test",
+    "coverage": "nyc --reporter=html --reporter=text npm test; echo coverage/index.html"
   },
   "repository": {
     "type": "git",
@@ -13,6 +15,7 @@
   "author": "Johan Olsson",
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "nyc": "^10.1.2"
   }
 }
