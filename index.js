@@ -7,6 +7,7 @@ module.exports = class Queue extends EventEmitter {
     super()
     this._locked = false
     this._paused = false
+    this._data = null
     this._queue = []
   }
 
@@ -23,16 +24,18 @@ module.exports = class Queue extends EventEmitter {
     this.emit('resumed')
 
     if (!this._locked)
-      this._process()
+      this._process(this._data)
   }
 
   push(task) {
     this._queue.push(() => new Promise((resolve) => {
       this.emit('task')
-      task(resolve)
+      task((data) => {
+        resolve(data)
+      }, this._data)
     }))
 
-    if (!this._locked && !this._paused) this._process()
+    if (!this._locked && !this._paused) this._process(this._data)
     return this
   }
 
@@ -46,16 +49,17 @@ module.exports = class Queue extends EventEmitter {
     this.emit('unlocked')
   }
 
-  _process() {
+  _process(data) {
     if (!this._queue.length)
       return this._unlock()
     else if (!this._locked)
       this._lock();
 
     const item = this._queue.shift()
-    item()
-      .then(() => {
-        this._process.call(this)
+    item(data)
+      .then((data) => {
+        this._data = data
+        this._process.call(this, data)
       })
       .catch((err) => console.log(err))
   }

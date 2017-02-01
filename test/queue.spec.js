@@ -71,8 +71,30 @@ describe('Queue', function() {
       next()
     })
     queue.resume()
+    queue.resume()
     setTimeout(() => {
       assert.equal(value, 2)
+      done()
+    })
+  })
+
+  it('should pass data to next task', (done) => {
+    const queue = new Queue()
+    var value
+
+    queue.push((next, data = 0) => {
+      next(data + 1)
+    })
+    queue.pause()
+    queue.push((next, data) => {
+      next(data + 1)
+    })
+    queue.resume()
+    queue.push((next, data) => {
+      next(data + 1)
+    })
+    queue.push((next, data) => {
+      assert.equal(data, 3)
       done()
     })
   })
