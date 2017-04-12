@@ -1,6 +1,18 @@
 # Queue [![Build Status](https://travis-ci.org/johan-olsson/Queue.svg?branch=master)](https://travis-ci.org/johan-olsson/Queue)
 
-# Methods
+# Getting Started
+
+```javascript
+const Queue = require('ssfq')
+const myQueue = new Queue(workerCount)
+
+myQueue.push((next) => {
+  /* do something */
+  next()
+})
+
+
+```
 
 ```javascript
 
@@ -34,10 +46,22 @@ db.find({
     console.log(doc)
   })
 ```
+# Methods
 
 ## push(task)
 
 push task to queue
+```javascript
+
+queue.push((next) => {
+  /* do something */
+  next()
+})
+```
+
+## unshift(task)
+
+Push task to the end of the queue.
 ```javascript
 
 queue.push((next) => {

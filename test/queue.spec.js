@@ -39,21 +39,72 @@ describe('Queue', function() {
     })
   })
 
+  it('should use multiple workers', (done) => {
+    const queue = new Queue(3)
+
+    let callCount = 0
+
+    const slowTask = (next) => {
+      setTimeout(() => {
+        callCount += 1
+        next()
+      }, 20)
+    }
+
+    queue.push(slowTask)
+    queue.push(slowTask)
+    queue.push(slowTask)
+
+    setTimeout(() => {
+      assert.equal(callCount, 3)
+      done()
+    }, 20)
+  })
+
   it('should emit events', (done) => {
-    const queue = new Queue()
+    const queue = new Queue(2)
     var events = []
 
     queue.on('task', () => events.push('task'))
+    queue.on('done', () => events.push('done'))
     queue.on('unlocked', () => events.push('unlocked'))
     queue.on('locked', () => events.push('locked'))
+    queue.on('idle', () => events.push('idle'))
 
+    queue.push((next) => next())
+    queue.push((next) => next())
     queue.push((next) => next())
     queue.push((next) => next())
 
     setTimeout(() => {
-      assert.equal(events.join(', '), 'locked, task, task, unlocked')
+      assert.equal(events.join(', '), 'task, done, locked, task, done, unlocked, locked, task, done, unlocked, locked, task, done, unlocked, idle')
       done()
     })
+  })
+
+  it('should run unshifted tasks first', (done) => {
+    const queue = new Queue()
+    var result = []
+
+    queue.push((next) => setTimeout(() => {
+      result.push('1')
+      next()
+    }, 5))
+
+    queue.push((next) => setTimeout(() => {
+      result.push('3')
+      next()
+    }, 5))
+
+    queue.unshift((next) => setTimeout(() => {
+      result.push('2')
+      next()
+    }, 5))
+
+    setTimeout(() => {
+      assert.equal(result.join(', '), '1, 2, 3')
+      done()
+    }, 20)
   })
 
   it('should pause and resume', (done) => {
