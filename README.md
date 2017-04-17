@@ -48,7 +48,7 @@ db.find({
 ```
 # Methods
 
-## push(task)
+## push(task, [options])
 
 push task to queue
 ```javascript
@@ -56,19 +56,14 @@ push task to queue
 queue.push((next) => {
   /* do something */
   next()
+}, {
+  priority: 2
 })
 ```
 
-## unshift(task)
+### options
 
-Push task to the end of the queue.
-```javascript
-
-queue.push((next) => {
-  /* do something */
-  next()
-})
-```
+* priority _number, highest priority get executed first._ **default:** `0`
 
 ## resume()
 unpause queue and continue processing tasks

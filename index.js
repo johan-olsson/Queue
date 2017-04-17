@@ -1,16 +1,25 @@
 'use strict'
 
 const EventEmitter = require('events')
+const Task = require('./Task')
 
 module.exports = class Queue extends EventEmitter {
-  constructor(workers) {
+  constructor(options) {
     super()
 
-    this._workers = workers || 1
+    options = Object.assign({
+      workers: 1
+    }, options)
+
+    this._workers = options.workers
     this._locked = 0
     this._paused = false
-    this._data = null
+    this._state = null
     this._queue = []
+  }
+
+  setWorkerCount(numberOfWorkers) {
+    this._workers = numberOfWorkers
   }
 
   pause() {
@@ -26,34 +35,25 @@ module.exports = class Queue extends EventEmitter {
     this.emit('resumed')
 
     if (this._locked < this._workers)
-      this._process(this._data)
+      this._process(this._state)
   }
 
-  push(task) {
-    this._queue.push(this._createTask(task))
+  push(task, options = {}) {
+    this._queue.push(new Task(task, options, this))
 
     if (this._locked < this._workers && !this._paused)
-      this._process(this._data);
-
-    return this
-  }
-
-  unshift(task) {
-    this._queue.unshift(this._createTask(task))
-
-    if (this._locked < this._workers && !this._paused)
-      this._process(this._data);
+      this._process(this._state);
 
     return this
   }
 
   _createTask(task) {
     return () => new Promise((resolve) => {
-      this.emit('task')
-      task((data) => {
-        resolve(data)
-        this.emit('done')
-      }, this._data)
+      this.emit('task', task)
+      task((state) => {
+        resolve(state)
+        this.emit('done', task)
+      }, this._state)
     })
   }
 
@@ -71,7 +71,7 @@ module.exports = class Queue extends EventEmitter {
       this.emit('unlocked');
   }
 
-  _process(data) {
+  _process(state) {
 
     if (!this._queue.length) {
       if (!this._locked) return this.emit('idle');
@@ -81,16 +81,24 @@ module.exports = class Queue extends EventEmitter {
 
     this._lock();
 
-    const item = this._queue.shift()
-    item(data)
-      .then(data => {
-        this._data = data
+    const item = this._queue.sort((a, b) => {
+      if (a._priority > b._priority || a._createdAt < b._createdAt)
+        return -1;
+      else if (a._priority < b._priority || a._createdAt > b._createdAt)
+        return 1;
+
+      return 0
+    }).shift()
+
+    item.process(state)
+      .then(state => {
+        this._state = state
         this._unlock()
-        this._process.call(this, data)
+        this._process.call(this, state)
       })
       .catch(err => {
+        console.error(err)
         this._unlock()
-        console.log(err)
       })
   }
 }

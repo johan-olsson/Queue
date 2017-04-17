@@ -40,7 +40,9 @@ describe('Queue', function() {
   })
 
   it('should use multiple workers', (done) => {
-    const queue = new Queue(3)
+    const queue = new Queue({
+      workers: 3
+    })
 
     let callCount = 0
 
@@ -62,7 +64,9 @@ describe('Queue', function() {
   })
 
   it('should emit events', (done) => {
-    const queue = new Queue(2)
+    const queue = new Queue({
+      workers: 2
+    })
     var events = []
 
     queue.on('task', () => events.push('task'))
@@ -82,29 +86,38 @@ describe('Queue', function() {
     })
   })
 
-  it('should run unshifted tasks first', (done) => {
+  it('should task with height priority', (done) => {
     const queue = new Queue()
     var result = []
 
-    queue.push((next) => setTimeout(() => {
-      result.push('1')
-      next()
-    }, 5))
-
-    queue.push((next) => setTimeout(() => {
-      result.push('3')
-      next()
-    }, 5))
-
-    queue.unshift((next) => setTimeout(() => {
+    queue.pause()
+    queue.push((next) => {
       result.push('2')
       next()
-    }, 5))
+    }, {
+      priority: 2
+    })
 
-    setTimeout(() => {
-      assert.equal(result.join(', '), '1, 2, 3')
+    queue.push((next) => {
+      result.push('1')
+      next()
+    }, {
+      priority: 1
+    })
+
+    queue.push((next) => {
+      result.push('3')
+      next()
+    }, {
+      priority: 3
+    })
+
+    queue.resume()
+
+    queue.on('idle', () => {
+      assert.equal(result.join(', '), '3, 2, 1')
       done()
-    }, 20)
+    })
   })
 
   it('should pause and resume', (done) => {
@@ -122,7 +135,6 @@ describe('Queue', function() {
       next()
     })
     queue.resume()
-    queue.resume()
     setTimeout(() => {
       assert.equal(value, 2)
       done()
@@ -133,8 +145,8 @@ describe('Queue', function() {
     const queue = new Queue()
     var value
 
-    queue.push((next, data = 0) => {
-      next(data + 1)
+    queue.push((next) => {
+      next(1)
     })
     queue.pause()
     queue.push((next, data) => {
