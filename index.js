@@ -82,9 +82,9 @@ module.exports = class Queue extends EventEmitter {
     this._lock();
 
     const item = this._queue.sort((a, b) => {
-      if (a._priority > b._priority || a._createdAt < b._createdAt)
+      if (a._priority > b._priority)
         return -1;
-      else if (a._priority < b._priority || a._createdAt > b._createdAt)
+      else if (a._priority < b._priority)
         return 1;
 
       return 0
